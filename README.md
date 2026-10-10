@@ -25,9 +25,26 @@ All settings are in the `CONFIG` block at the top of `script.js`:
 | `APP_VERSION` | `1.0.0` | Version shown in the download card |
 | `APK_DOWNLOAD_URL` | `YOUR_APK_DOWNLOAD_URL` | Link used by every download button |
 | `APP_ICON_PATH` | `assets/app-icon.png` | Icon used in the nav, download card and footer |
+| `COUNTER_WORKSPACE` | `YOUR_COUNTERAPI_WORKSPACE` | CounterAPI workspace used for live visit and download-click totals |
 | `POSTERS` | `[]` | Images for the hero poster wall |
 
 **Required before publishing:** replace `YOUR_APK_DOWNLOAD_URL` with your real APK link.
+
+### Live activity totals
+
+The page can display shared totals without a database or server of its own by
+using [CounterAPI](https://counterapi.dev/):
+
+1. Create a CounterAPI account and workspace.
+2. Set `COUNTER_WORKSPACE` in `script.js` to the workspace name.
+3. Publish the site. The `visits` counter increments when the page loads, and
+   the `downloads` counter increments when a download button is clicked.
+
+The displayed download total counts button clicks, not confirmed completed APK
+downloads. Website visits count page loads, not unique people. These public
+browser-side counters can be affected by repeat visits or automated requests.
+If the workspace is not configured or the service is unavailable, the page
+shows a status message instead of a fabricated total.
 
 ## Hosting the APK
 

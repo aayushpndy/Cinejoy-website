@@ -7,6 +7,7 @@ const CONFIG = {
   APK_DOWNLOAD_URL:
     "https://github.com/aayushpndy/Cinejoy-download/releases/download/V1.0.0/Cinejoy.apk", // <- replace with your real APK link
   APP_ICON_PATH: "assets/app-icon.png",
+  COUNTER_WORKSPACE: "page-view-count",
 
   // Hero poster wall. Add images you have the rights to use, e.g.
   // { src: "assets/posters/poster-1.jpg", title: "Movie title" }
@@ -41,6 +42,64 @@ const CONFIG = {
     el.setAttribute("download", "");
     el.setAttribute("rel", "noopener");
   });
+  const metricEls = {
+    visits: document.querySelector('[data-metric="visits"]'),
+    downloads: document.querySelector('[data-metric="downloads"]'),
+  };
+  const metricsStatus = document.querySelector("[data-metrics-status]");
+  const counterWorkspace = CONFIG.COUNTER_WORKSPACE.trim();
+  const countersEnabled =
+    counterWorkspace && counterWorkspace !== "YOUR_COUNTERAPI_WORKSPACE";
+  const counterUrl = (name, action = "") =>
+    `https://api.counterapi.dev/v2/${encodeURIComponent(counterWorkspace)}/${name}${action}`;
+  const showMetricError = (message, error) => {
+    console.error("Cinejoy counters:", error);
+    metricsStatus.textContent = message;
+  };
+  const updateMetric = async (name, action = "", keepalive = false) => {
+    const response = await fetch(counterUrl(name, action), {
+      cache: "no-store",
+      keepalive,
+    });
+    if (!response.ok)
+      throw new Error(`Counter API returned ${response.status}`);
+    const result = await response.json();
+    const count = result?.data?.up_count;
+    if (!Number.isSafeInteger(count) || count < 0) {
+      throw new Error("Counter API returned an invalid count");
+    }
+    metricEls[name].textContent = count.toLocaleString();
+    return true;
+  };
+  if (countersEnabled) {
+    metricsStatus.textContent = "Loading live totals…";
+    Promise.all([
+      updateMetric("visits", "/up").catch((error) => {
+        metricEls.visits.textContent = "Unavailable";
+        console.error("Cinejoy website visit counter:", error);
+        return false;
+      }),
+      updateMetric("downloads").catch((error) => {
+        metricEls.downloads.textContent = "Unavailable";
+        console.error("Cinejoy download counter:", error);
+        return false;
+      }),
+    ]).then((results) => {
+      metricsStatus.textContent = results.every(Boolean)
+        ? "Live totals from CounterAPI."
+        : "One or more live totals are temporarily unavailable.";
+    });
+    $$("[data-apk]").forEach((el) => {
+      el.addEventListener("click", () => {
+        updateMetric("downloads", "/up", true).catch((error) => {
+          showMetricError("Could not record this download click.", error);
+        });
+      });
+    });
+  } else {
+    metricsStatus.textContent =
+      "Set COUNTER_WORKSPACE in script.js to enable live totals.";
+  }
   if (CONFIG.APK_DOWNLOAD_URL === "YOUR_APK_DOWNLOAD_URL") {
     console.warn(
       "Cinejoy: set APK_DOWNLOAD_URL in script.js before publishing.",
