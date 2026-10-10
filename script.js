@@ -5,7 +5,7 @@ const CONFIG = {
   APP_NAME: "Cinejoy",
   APP_VERSION: "1.0.0",
   APK_DOWNLOAD_URL:
-    "https://github.com/aayushpndy/Cinejoy-download/releases/download/V1.0.0/app-release.apk", // <- replace with your real APK link
+    "https://github.com/aayushpndy/Cinejoy-download/releases/download/V1.0.0/Cinejoy.apk", // <- replace with your real APK link
   APP_ICON_PATH: "assets/app-icon.png",
 
   // Hero poster wall. Add images you have the rights to use, e.g.
